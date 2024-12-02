@@ -30,8 +30,9 @@ export const createDateFormatter = ({
     return config.formatDate(dateObj, frmt, locale);
   }
 
-  return frmt
-    .split("")
+  const substrings = splitSubstrings(frmt, ['SSS']);
+
+  return substrings
     .map((c, i, arr) =>
       formats[c as token] && arr[i - 1] !== "\\"
         ? formats[c as token](dateObj, locale, config)
@@ -41,6 +42,31 @@ export const createDateFormatter = ({
     )
     .join("");
 };
+
+function splitSubstrings(input: string, substrings: string[]): string[] {
+  const result: string[] = [];
+  let i = 0;
+
+  while (i < input.length) {
+    let matched = false;
+
+    for (const substring of substrings) {
+      if (input.substring(i, substring.length + i) === substring) {
+          result.push(substring);
+          i += substring.length;
+          matched = true;
+          break;
+      }
+    }
+
+    if (!matched) {
+      result.push(input[i]);
+      i++;
+    }
+  }
+
+  return result;
+}
 
 export const createDateParser = ({ config = defaults, l10n = english }) => (
   date: Date | string | number,
@@ -65,7 +91,7 @@ export const createDateParser = ({ config = defaults, l10n = english }) => (
     parsedDate = new Date(date);
   else if (typeof date === "string") {
     // date string
-    const format = givenFormat || (config || defaults).dateFormat;
+    let format = givenFormat || (config || defaults).dateFormat;
     const datestr = String(date).trim();
 
     if (datestr === "today") {
@@ -82,10 +108,12 @@ export const createDateParser = ({ config = defaults, l10n = english }) => (
       let matched,
         ops: { fn: RevFormatFn; val: string }[] = [];
 
-      for (let i = 0, matchIndex = 0, regexStr = ""; i < format.length; i++) {
-        const token = format[i] as token;
+      let tokens = splitSubstrings(format, ['SSS']);
+
+      for (let i = 0, matchIndex = 0, regexStr = ""; i < tokens.length; i++) {
+        const token = tokens[i] as token;
         const isBackSlash = (token as string) === "\\";
-        const escaped = format[i - 1] === "\\" || isBackSlash;
+        const escaped = tokens[i - 1] === "\\" || isBackSlash;
 
         if (tokenRegex[token] && !escaped) {
           regexStr += tokenRegex[token];
@@ -162,10 +190,26 @@ export const calculateSecondsSinceMidnight = (
   return hours * 3600 + minutes * 60 + seconds;
 };
 
+export const calculateMillisecondsSinceMidnight = (
+    hours: number,
+    minutes: number,
+    seconds: number,
+    milliseconds: number
+) => {
+    return calculateSecondsSinceMidnight(hours, minutes, seconds) * 1000 + milliseconds;
+};
+
 export const parseSeconds = (secondsSinceMidnight: number) => {
   const hours = Math.floor(secondsSinceMidnight / 3600),
     minutes = (secondsSinceMidnight - hours * 3600) / 60;
   return [hours, minutes, secondsSinceMidnight - hours * 3600 - minutes * 60];
+};
+
+export const parseMilliseconds = (millisecondsSinceMidnight: number) => {
+    const secondsSinceMidnight = Math.floor(millisecondsSinceMidnight / 1000);
+    var result = parseSeconds(secondsSinceMidnight);
+    result.push(millisecondsSinceMidnight - secondsSinceMidnight * 1000);
+    return result;
 };
 
 export const duration = {
@@ -176,11 +220,13 @@ export function getDefaultHours(config: ParsedOptions) {
   let hours = config.defaultHour;
   let minutes = config.defaultMinute;
   let seconds = config.defaultSeconds;
+  let milliseconds = config.defaultMilliseconds;
 
   if (config.minDate !== undefined) {
     const minHour = config.minDate.getHours();
     const minMinutes = config.minDate.getMinutes();
     const minSeconds = config.minDate.getSeconds();
+    const minMilliseconds = config.minDate.getMilliseconds();
 
     if (hours < minHour) {
       hours = minHour;
@@ -192,17 +238,25 @@ export function getDefaultHours(config: ParsedOptions) {
 
     if (hours === minHour && minutes === minMinutes && seconds < minSeconds)
       seconds = config.minDate.getSeconds();
+
+    if (hours === minHour && minutes === minMinutes && seconds === minSeconds && milliseconds < minMilliseconds )
+      milliseconds = config.minDate.getMilliseconds();
   }
 
   if (config.maxDate !== undefined) {
-    const maxHr = config.maxDate.getHours();
+    const maxHour = config.maxDate.getHours();
     const maxMinutes = config.maxDate.getMinutes();
-    hours = Math.min(hours, maxHr);
+    const maxSeconds = config.maxDate.getSeconds();
+    const maxMilliseconds = config.maxDate.getMilliseconds();
 
-    if (hours === maxHr) minutes = Math.min(maxMinutes, minutes);
-    if (hours === maxHr && minutes === maxMinutes)
-      seconds = config.maxDate.getSeconds();
+    hours = Math.min(hours, maxHour);
+
+    if (hours === maxHour) minutes = Math.min(maxMinutes, minutes);
+
+    if (hours === maxHour && minutes === maxMinutes) seconds = Math.min(maxSeconds, seconds);
+
+    if (hours === maxHour && minutes === maxMinutes && seconds === maxSeconds) milliseconds = Math.min(maxMilliseconds, milliseconds);
   }
 
-  return { hours, minutes, seconds };
+  return { hours, minutes, seconds, milliseconds };
 }

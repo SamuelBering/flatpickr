@@ -1239,20 +1239,28 @@ describe("flatpickr", () => {
     });
 
     it("time input and increments", () => {
+        debugger;
       createInstance({
         enableTime: true,
-        defaultDate: "2017-1-1 10:00",
+        enableSeconds: true,
+        enableMilliseconds: true,
+        dateFormat: "Y-m-d H:i:S:SSS",
+        defaultDate: "2017-01-01 10:00:45:123",
         //minDate: "2017-1-01 3:35",
       });
 
       expect(fp.hourElement).toBeDefined();
       expect(fp.minuteElement).toBeDefined();
+      expect(fp.secondElement).toBeDefined();
+      expect(fp.millisecondElement).toBeDefined();
       expect(fp.amPM).toBeDefined();
 
-      if (!fp.hourElement || !fp.minuteElement || !fp.amPM) return;
+      if (!fp.hourElement || !fp.minuteElement || !fp.secondElement || !fp.millisecondElement || !fp.amPM) return;
 
       expect(fp.hourElement.value).toEqual("10");
       expect(fp.minuteElement.value).toEqual("00");
+      expect(fp.secondElement.value).toEqual("45");
+      expect(fp.millisecondElement.value).toEqual("123");
       expect(fp.amPM.textContent).toEqual("AM");
 
       incrementTime("hourElement", 1);

@@ -11,6 +11,7 @@ export type token =
   | "K"
   | "M"
   | "S"
+  | "SSS"
   | "U"
   | "W"
   | "Y"
@@ -66,6 +67,9 @@ export const revFormat: RevFormat = {
   },
   S: (dateObj: Date, seconds: string) => {
     dateObj.setSeconds(parseFloat(seconds));
+  },
+  SSS: (dateObj: Date, milliseconds: string) => {
+    dateObj.setMilliseconds(parseFloat(milliseconds));
   },
   U: (_: Date, unixSeconds: string) => new Date(parseFloat(unixSeconds) * 1000),
 
@@ -129,6 +133,7 @@ export const tokenRegex: TokenRegex = {
   K: "", // locale-dependent, setup on runtime
   M: "", // locale-dependent, setup on runtime
   S: "(\\d\\d|\\d)",
+  SSS: "(\\d\\d\\d|\\d\\d|\\d)",
   U: "(.+)",
   W: "(\\d\\d|\\d)",
   Y: "(\\d{4})",
@@ -195,6 +200,9 @@ export const formats: Formats = {
 
   // seconds 00-59
   S: (date: Date) => pad(date.getSeconds()),
+
+  // milliseconds 000-999
+  SSS: (date: Date) => pad(date.getMilliseconds(), 3),
 
   // unix timestamp
   U: (date: Date) => date.getTime() / 1000,

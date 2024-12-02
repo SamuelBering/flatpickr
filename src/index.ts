@@ -30,8 +30,8 @@ import {
   duration,
   isBetween,
   getDefaultHours,
-  calculateSecondsSinceMidnight,
-  parseSeconds,
+  calculateMillisecondsSinceMidnight,
+  parseMilliseconds
 } from "./utils/dates";
 
 import { tokenRegex, monthToStr } from "./utils/formatting";
@@ -237,7 +237,11 @@ function FlatpickrInstance(
       seconds =
         self.secondElement !== undefined
           ? (parseInt(self.secondElement.value, 10) || 0) % 60
-          : 0;
+                : 0,
+      milliseconds =
+            self.millisecondElement !== undefined
+                ? (parseInt(self.millisecondElement.value, 10) || 0) % 1000
+                : 0;
 
     if (self.amPM !== undefined) {
       hours = ampm2military(hours, self.amPM.textContent as string);
@@ -264,27 +268,31 @@ function FlatpickrInstance(
       self.config.minTime !== undefined &&
       self.config.minTime > self.config.maxTime
     ) {
-      const minBound = calculateSecondsSinceMidnight(
+      const minBound = calculateMillisecondsSinceMidnight(
         self.config.minTime.getHours(),
         self.config.minTime.getMinutes(),
-        self.config.minTime.getSeconds()
+        self.config.minTime.getSeconds(),
+        self.config.minTime.getMilliseconds()
       );
-      const maxBound = calculateSecondsSinceMidnight(
+      const maxBound = calculateMillisecondsSinceMidnight(
         self.config.maxTime.getHours(),
         self.config.maxTime.getMinutes(),
-        self.config.maxTime.getSeconds()
+        self.config.maxTime.getSeconds(),
+        self.config.minTime.getMilliseconds()
       );
-      const currentTime = calculateSecondsSinceMidnight(
+      const currentTime = calculateMillisecondsSinceMidnight(
         hours,
         minutes,
-        seconds
+        seconds,
+        milliseconds
       );
 
       if (currentTime > maxBound && currentTime < minBound) {
-        const result = parseSeconds(minBound);
+        const result = parseMilliseconds(minBound);
         hours = result[0];
         minutes = result[1];
         seconds = result[2];
+        milliseconds = result[3];
       }
     } else {
       if (limitMaxHours) {
@@ -298,6 +306,9 @@ function FlatpickrInstance(
 
         if (minutes === maxTime.getMinutes())
           seconds = Math.min(seconds, maxTime.getSeconds());
+
+        if (seconds === maxTime.getSeconds())
+          milliseconds = Math.min(milliseconds, maxTime.getMilliseconds());
       }
 
       if (limitMinHours) {
@@ -311,11 +322,14 @@ function FlatpickrInstance(
           minutes = minTime.getMinutes();
 
         if (minutes === minTime.getMinutes())
-          seconds = Math.max(seconds, minTime.getSeconds());
+           seconds = Math.max(seconds, minTime.getSeconds());
+
+        if (seconds === minTime.getSeconds())
+           milliseconds = Math.max(milliseconds, minTime.getMilliseconds());
       }
     }
 
-    setHours(hours, minutes, seconds);
+      setHours(hours, minutes, seconds, milliseconds);
   }
 
   /**
@@ -325,7 +339,7 @@ function FlatpickrInstance(
     const date = dateObj || self.latestSelectedDateObj;
 
     if (date && date instanceof Date) {
-      setHours(date.getHours(), date.getMinutes(), date.getSeconds());
+        setHours(date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
     }
   }
 
@@ -338,9 +352,9 @@ function FlatpickrInstance(
    * @param {Number} minutes the minutes
    * @param {Number} seconds the seconds (optional)
    */
-  function setHours(hours: number, minutes: number, seconds: number) {
+    function setHours(hours: number, minutes: number, seconds: number, milliseconds: number) {
     if (self.latestSelectedDateObj !== undefined) {
-      self.latestSelectedDateObj.setHours(hours % 24, minutes, seconds || 0, 0);
+        self.latestSelectedDateObj.setHours(hours % 24, minutes, seconds || 0, milliseconds || 0);
     }
 
     if (!self.hourElement || !self.minuteElement || self.isMobile) return;
@@ -357,7 +371,10 @@ function FlatpickrInstance(
       self.amPM.textContent = self.l10n.amPM[int(hours >= 12)];
 
     if (self.secondElement !== undefined)
-      self.secondElement.value = pad(seconds);
+        self.secondElement.value = pad(seconds);
+
+    if (self.millisecondElement !== undefined)
+        self.millisecondElement.value = pad(milliseconds, 3);
   }
 
   /**
@@ -1219,6 +1236,8 @@ function FlatpickrInstance(
       self.timeContainer.appendChild(secondInput);
     }
 
+    buildMilliseconds(defaults);
+
     if (!self.config.time_24hr) {
       // add self.amPM if appropriate
       self.amPM = createElement(
@@ -1238,6 +1257,36 @@ function FlatpickrInstance(
     }
 
     return self.timeContainer;
+  }
+
+    function buildMilliseconds(defaults: { hours: number; minutes: number; seconds: number; milliseconds: number }) {
+    if (self.config.enableMilliseconds) {
+      self.timeContainer!.classList.add("hasMilliseconds");
+
+      const millisecondInput = createNumberInput("flatpickr-millisecond");
+      self.millisecondElement = millisecondInput.getElementsByTagName(
+        "input"
+      )[0] as HTMLInputElement;
+
+      self.millisecondElement.value = pad(
+        self.latestSelectedDateObj
+          ? self.latestSelectedDateObj.getMilliseconds()
+          : defaults.milliseconds
+      );
+
+      self.millisecondElement.setAttribute(
+        "step",
+        self.minuteElement!.getAttribute("step") as string
+      );
+      self.millisecondElement.setAttribute("min", "0");
+      self.millisecondElement.setAttribute("max", "999");
+      self.millisecondElement.setAttribute("maxlength", "3");
+
+      self.timeContainer!.appendChild(
+        createElement("span", "flatpickr-time-separator", ":")
+      );
+      self.timeContainer!.appendChild(millisecondInput);
+    }
   }
 
   function buildWeekdays() {
@@ -1345,8 +1394,8 @@ function FlatpickrInstance(
     }
 
     if (self.config.enableTime === true) {
-      const { hours, minutes, seconds } = getDefaultHours(self.config);
-      setHours(hours, minutes, seconds);
+      const { hours, minutes, seconds, milliseconds } = getDefaultHours(self.config);
+      setHours(hours, minutes, seconds, milliseconds);
     }
 
     self.redraw();
@@ -2892,7 +2941,7 @@ function FlatpickrInstance(
 
     let newValue = curValue + step * delta;
 
-    if (typeof input.value !== "undefined" && input.value.length === 2) {
+    if (typeof input.value !== "undefined" && (input.value.length === 2 || input.value.length === 3)) {
       const isHourElem = input === self.hourElement,
         isMinuteElem = input === self.minuteElement;
 
@@ -2922,7 +2971,7 @@ function FlatpickrInstance(
           self.l10n.amPM[int(self.amPM.textContent === self.l10n.amPM[0])];
       }
 
-      input.value = pad(newValue);
+      input.value = pad(newValue, input.value.length);
     }
   }
 
