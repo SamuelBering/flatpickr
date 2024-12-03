@@ -58,7 +58,8 @@ function incrementTime(
     | "currentYearElement"
     | "hourElement"
     | "minuteElement"
-    | "secondElement",
+    | "secondElement"
+    | "millisecondElement",
   by: number
 ) {
   const e = fp[type];
@@ -1244,8 +1245,8 @@ describe("flatpickr", () => {
         enableTime: true,
         enableSeconds: true,
         enableMilliseconds: true,
-        dateFormat: "Y-m-d H:i:S:SSS",
-        defaultDate: "2017-01-01 10:00:45:123",
+        dateFormat: "Y-m-d H:i:S.SSS",
+        defaultDate: "2017-01-01 10:00:45.123",
         //minDate: "2017-1-01 3:35",
       });
 
@@ -1268,6 +1269,12 @@ describe("flatpickr", () => {
 
       incrementTime("minuteElement", 1);
       expect(fp.minuteElement.value).toEqual("05");
+
+      incrementTime("secondElement", 1);
+      expect(fp.secondElement.value).toEqual("50");
+
+      incrementTime("millisecondElement", 1);
+      expect(fp.millisecondElement.value).toEqual("128");
 
       simulate("click", fp.amPM, { which: 1 }, MouseEvent);
       expect(fp.amPM.textContent).toEqual("PM");

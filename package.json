@@ -1,15 +1,16 @@
 {
-  "name": "flatpickr",
-  "version": "4.6.13",
+  "name": "@samuelbering/flatpickr",
+  "version": "4.6.17",
   "description": "A lightweight, powerful javascript datetime picker",
   "scripts": {
-    "build": "run-s build:pre build:build build:esm build:types build:post build:post2",
+    "build": "run-s build:pre build:build build:esm build:types build:post build:post2 build:post3",
     "build:pre": "rimraf dist",
     "build:build": "ts-node --transpile-only build.ts",
     "build:esm": "tsc -p tsconfig.esm.json",
     "build:types": "tsc -p tsconfig.declarations.json",
     "build:post": "cp src/typings.d.ts dist/typings.d.ts",
     "build:post2": "cp dist/flatpickr.js c:/dev/devops/Astrada3/Astrada.Web/Scripts/app/lib/flatpickr/flatpickr.js",
+    "build:post3": "cp dist/flatpickr.css c:/dev/devops/Astrada3/Astrada.Web/Scripts/app/lib/flatpickr/flatpickr.css",
     "fmt": "prettier --ignore-path .gitignore --trailing-comma es5 --write \"**/*.ts\"",
     "fmt:check": "prettier --ignore-path .gitignore --trailing-comma es5 --check \"**/*.ts\"",
     "start": "npm run build:build -- --dev",
@@ -58,7 +59,7 @@
   "types": "./dist/typings.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chmln/flatpickr.git"
+    "url": "git+https://github.com/SamuelBering/flatpickr.git"
   },
   "author": "Gregory <gregory.mkv@gmail.com>",
   "license": "MIT",

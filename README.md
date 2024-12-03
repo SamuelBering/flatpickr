@@ -1,3 +1,20 @@
+This package is forked from [flatpickr](https://github.com/flatpickr/flatpickr) due to the need to be able to edit milliseconds.
+
+## Extended Feature
+- option to enable milliseconds and use SSS token in date format.
+ ```html
+  <script src="./dist/flatpickr.js"></script>
+
+  <script>
+    var fp = flatpickr(".date-time", {
+      enableTime: true,
+      enableSeconds: true,
+      enableMilliseconds: true,
+      dateFormat: "Y-m-d H:i:S.SSS"
+    })
+  </script>
+ ```
+
 ## flatpickr - javascript datetime picker
 [![Actions Status](https://github.com/flatpickr/flatpickr/workflows/GitHub%20Actions/badge.svg)](https://github.com/flatpickr/flatpickr/actions)
 

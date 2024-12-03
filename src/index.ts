@@ -498,6 +498,13 @@ function FlatpickrInstance(
           () => self.secondElement && self.secondElement.select()
         );
 
+      if (self.millisecondElement !== undefined)
+        bind(
+          self.millisecondElement,
+          "focus",
+          () => self.millisecondElement && self.millisecondElement.select()
+        );
+
       if (self.amPM !== undefined) {
         bind(self.amPM, "click", (e) => {
           updateTime(e);
@@ -1809,6 +1816,7 @@ function FlatpickrInstance(
               self.hourElement,
               self.minuteElement,
               self.secondElement,
+              self.millisecondElement,
               self.amPM,
             ] as Node[])
               .concat(self.pluginElements)
