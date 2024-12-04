@@ -15,6 +15,8 @@ This package is forked from [flatpickr](https://github.com/flatpickr/flatpickr) 
     })
   </script>
  ```
+![image](https://github.com/user-attachments/assets/14824df7-83fa-4da3-b9b9-be203480e2be)
+
 
 ## flatpickr - javascript datetime picker
 [![Actions Status](https://github.com/flatpickr/flatpickr/workflows/GitHub%20Actions/badge.svg)](https://github.com/flatpickr/flatpickr/actions)
