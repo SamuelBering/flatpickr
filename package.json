@@ -1,6 +1,6 @@
 {
-  "name": "@samuelbering/flatpickr",
-  "version": "4.6.17",
+  "name": "milliseconds-flatpickr",
+  "version": "1.0.0",
   "description": "A lightweight, powerful javascript datetime picker",
   "scripts": {
     "build": "run-s build:pre build:build build:esm build:types build:post build:post2 build:post3",
@@ -11,6 +11,12 @@
     "build:post": "cp src/typings.d.ts dist/typings.d.ts",
     "build:post2": "cp dist/flatpickr.js c:/dev/devops/Astrada3/Astrada.Web/Scripts/app/lib/flatpickr/flatpickr.js",
     "build:post3": "cp dist/flatpickr.css c:/dev/devops/Astrada3/Astrada.Web/Scripts/app/lib/flatpickr/flatpickr.css",
+    "package": "run-s package:pre package:dist package:src package:post package:post2",
+    "package:pre": "rimraf package && mkdir \"package/src\"",
+    "package:dist": "cp -R dist package/dist",
+    "package:src": "cp -R src/style package/src/style",
+    "package:post": "cp LICENSE.md README.md package/",
+    "package:post2": "cp distPackage.json package/package.json",
     "fmt": "prettier --ignore-path .gitignore --trailing-comma es5 --write \"**/*.ts\"",
     "fmt:check": "prettier --ignore-path .gitignore --trailing-comma es5 --check \"**/*.ts\"",
     "start": "npm run build:build -- --dev",

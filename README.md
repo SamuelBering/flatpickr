@@ -7,6 +7,7 @@ This package is forked from [flatpickr](https://github.com/flatpickr/flatpickr) 
 
   <script>
     var fp = flatpickr(".date-time", {
+      defaultDate: "2017-01-01 09:30:15.123",
       enableTime: true,
       enableSeconds: true,
       enableMilliseconds: true,
